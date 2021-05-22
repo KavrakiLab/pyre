@@ -1,0 +1,33 @@
+<launch>
+
+ <!-- Debug flag  -->
+  <arg name="debug" default="false" />
+  <arg unless="$(arg debug)" name="launch_prefix" value="" />
+  <arg if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
+
+  <!-- dataset information -->
+  <arg name="dataset" /> 
+  <arg name="database" /> 
+  <arg name="planner_name" default="RRTConnectDefault" /> 
+  <arg name="algo" default="0" doc="0:Uniform 1:Spark, 2:Flame"/>
+  <arg name="start" default="1"/> 
+  <arg name="end" default="100"/> 
+  <arg name="reps" default="1"/> 
+  <arg name="time" default="60"/> 
+  <arg name="postfix" default=""/> 
+
+  <!-- Start the tester node -->
+  <node name="$(anon benchmarker)" launch-prefix="$(arg launch_prefix)" pkg="pyre" type="benchmark" output="screen"> 
+      <param name="dataset" value="$(arg dataset)"/>
+      <param name="database" value="$(arg database)"/>
+      <param name="planner_name" value="$(arg planner_name)"/>
+
+      <param name="algo" value="$(arg algo)"/>
+      <param name="start" value="$(arg start)"/>
+      <param name="end" value="$(arg end)"/>
+      <param name="reps" value="$(arg reps)"/>
+      <param name="time" value="$(arg time)"/>
+      <param name="postfix" value="$(arg postfix)"/>
+  </node>
+  
+</launch>

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>pyre</name>
+  <version>0.0.1</version>
+  <description>An implementation of SPARK and FLAME: two learning-for-motion-planning frameworks suitable for High-DOF Robots in geometric or sensed 3D workspaces</description>
+  <maintainer email="chamzas@rice.edu">Constantinos Chamzas</maintainer>
+  <author email="chamzas@rice.edu">Constantinos Chamzas</author>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>robowflex_ompl</depend>
+  <depend>robowflex_library</depend>
+
+</package>

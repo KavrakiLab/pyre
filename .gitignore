@@ -1,0 +1,50 @@
+# Build
+*/build
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+core
+
+# Compile Commands
+*compile_commands.json
+
+# Python 
+__pycache__
+*.pyc
+
+#Vim
+*.swp
+
+datasets/
+database/
+benchmark/

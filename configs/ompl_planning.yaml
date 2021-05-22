@@ -1,0 +1,66 @@
+planner_configs:
+  SBLDefault:
+    type: geometric::SBL
+  ESTDefault:
+    type: geometric::EST
+  LBKPIECEDefault:
+    type: geometric::LBKPIECE
+  BKPIECEDefault:
+    type: geometric::BKPIECE
+  KPIECEDefault:
+    type: geometric::KPIECE
+  RRTDefault:
+    type: geometric::RRT
+  RRTConnectDefault:
+    type: geometric::RRTConnect
+  RRTstarDefault:
+    type: geometric::RRTstar
+  TRRTDefault:
+    type: geometric::TRRT
+  PRMDefault:
+    type: geometric::PRM
+  PRMstarDefault:
+    type: geometric::PRMstar
+arm:
+  planner_configs:
+    - SBLDefault
+    - ESTDefault
+    - LBKPIECEDefault
+    - BKPIECEDefault
+    - KPIECEDefault
+    - RRTDefault
+    - RRTConnectDefault
+    - RRTstarDefault
+    - TRRTDefault
+    - PRMDefault
+    - PRMstarDefault
+  projection_evaluator: joints(shoulder_pan_joint,shoulder_lift_joint)
+  longest_valid_segment_fraction: 0.005
+arm_with_torso:
+  planner_configs:
+    - SBLDefault
+    - ESTDefault
+    - LBKPIECEDefault
+    - BKPIECEDefault
+    - KPIECEDefault
+    - RRTDefault
+    - RRTConnectDefault
+    - RRTstarDefault
+    - TRRTDefault
+    - PRMDefault
+    - PRMstarDefault
+  projection_evaluator: joints(torso_lift_joint,shoulder_pan_joint)
+  longest_valid_segment_fraction: 0.005
+gripper:
+  planner_configs:
+    - SBLDefault
+    - ESTDefault
+    - LBKPIECEDefault
+    - BKPIECEDefault
+    - KPIECEDefault
+    - RRTDefault
+    - RRTConnectDefault
+    - RRTstarDefault
+    - TRRTDefault
+    - PRMDefault
+    - PRMstarDefault

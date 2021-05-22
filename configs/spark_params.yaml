@@ -1,0 +1,5 @@
+dradius: 0.4
+dclust: 0.15
+dpairs: 0.2
+sigma: 0.2
+lambda: 0.5

@@ -1,0 +1,27 @@
+<launch>
+
+ <!-- Debug flag  -->
+  <arg name="debug" default="false" />
+  <arg unless="$(arg debug)" name="launch_prefix" value="" />
+  <arg if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
+
+  <!-- dataset information -->
+  <arg name="dataset" default="" /> 
+  <arg name="database" default="" /> 
+  <arg name="algo" default="0" doc="0:Spark, 1:Flame"/>
+  <arg name="show" default="0" doc="0:Scene, 1:DB"/>
+  <arg name="start" default="1"/> 
+  <arg name="end" default="10"/> 
+
+  <!-- Start the tester node -->
+  <node name="$(anon visualize)" launch-prefix="$(arg launch_prefix)" pkg="pyre" type="visualize_db" output="screen"> 
+      <param name="dataset" value="$(arg dataset)"/>
+      <param name="database" value="$(arg database)"/>
+
+      <param name="algo" value="$(arg algo)"/>
+      <param name="show" value="$(arg show)"/>
+      <param name="start" value="$(arg start)"/>
+      <param name="end" value="$(arg end)"/>
+  </node>
+  
+</launch>
