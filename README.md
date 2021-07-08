@@ -4,6 +4,7 @@ An implementation of SPARK and FLAME: two learning-for-motion-planning framework
 
 - [Paper](https://arxiv.org/abs/2010.15335)
 - [Short_Video](https://youtu.be/cH4_lIjjs58) (2 min)
+- [Long_Video](https://youtu.be/DP0376NNHQo) (11 min)
 
 Please cite our work if you use our code or compare to our approach.
 ```
