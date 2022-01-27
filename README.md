@@ -21,7 +21,7 @@ Please cite our work if you use our code or compare to our approach.
 
 The following instructions have been tested on **Ubuntu 18.04**. Similar
 instructions should work for other Linux distributions.
-1. Install [Robowflex](https://github.com/KavrakiLab/robowflex) v1.2 and above. You can follow [these instructions](https://kavrakilab.github.io/robowflex/md__home_runner_work_robowflex_robowflex__8docs_markdown_installation.html). 
+1. Install [Robowflex](https://github.com/KavrakiLab/robowflex) **v1.2 [later versions do not work currently]**. You can follow [these instructions](https://kavrakilab.github.io/robowflex/md__home_runner_work_robowflex_robowflex__8docs_markdown_installation.html). 
 
 2. Clone this repository into the `src` folder of your catkin workspace:
 
