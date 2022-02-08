@@ -44,7 +44,7 @@
 #include <robowflex_library/io/visualization.h>
 #include <robowflex_library/random.h>
 
-#include <pyre/ebenchmarking.h>
+//#include <pyre/ebenchmarking.h>
 #include <pyre/spark.h>
 #include <pyre/flame.h>
 #include <pyre/database.h>

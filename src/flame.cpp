@@ -269,7 +269,7 @@ std::vector<Entry *> Flame::createEntries(std::vector<FlamePrimitive *> &primiti
             const auto &box = robowflex::Geometry::makeBox(bsize, bsize, bsize);
 
             scene_copy->updateCollisionObject("temp", box, p->pose);
-            if (scene_copy->distanceToObject(state, "temp") <= 0)
+            if (scene_copy->distanceToObject(*state, "temp") <= 0)
                 entries.emplace_back(new Entry(p, traj_vec[i]));
             scene_copy->removeCollisionObject("temp");
         }

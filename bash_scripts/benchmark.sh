@@ -16,8 +16,8 @@ do
     dbFLAME=$prefix_db/$ds/flamedb0001_0500
 
 
-    roslaunch --wait pyre benchmark.launch start:=$start end:=$end dataset:=$dset database:="none" algo:=0 time:=60 &
-    roslaunch --wait pyre benchmark.launch start:=$start end:=$end dataset:=$dset database:=$dbSPARK postfix:="_500" algo:=1 time:=60 &
-    roslaunch --wait pyre benchmark.launch start:=$start end:=$end dataset:=$dset database:=$dbFLAME postfix:="_500" algo:=2 time:=60 &
+    roslaunch --wait pyre benchmark.launch start:=$start end:=$end dataset:=$dset database:="none" algo:="UNIFORM" time:=60 &
+    roslaunch --wait pyre benchmark.launch start:=$start end:=$end dataset:=$dset database:=$dbSPARK postfix:="_500" algo:="SPARK" time:=60 &
+    roslaunch --wait pyre benchmark.launch start:=$start end:=$end dataset:=$dset database:=$dbFLAME postfix:="_500" algo:="FLAME" time:=60 &
     wait
 done

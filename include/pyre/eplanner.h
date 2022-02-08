@@ -77,15 +77,6 @@ namespace pyre
         plan(const robowflex::SceneConstPtr &scene,
              const planning_interface::MotionPlanRequest &request) override;
 
-        /** \brief Sets the simplification flag. */
-        void setSimplifySolutions(const bool &flag);
-
-        /** \brief Sets the interpolation flag. */
-        void setInterpolation(const bool &flag);
-
-        /** \brief Sets the lambda ratio.*/
-        void setLambda(const double &lambda);
-
         /** \brief Gets the last simple Setup .*/
         ompl::geometric::SimpleSetupPtr getSS() const;
 
@@ -112,10 +103,6 @@ namespace pyre
         robowflex::ScenePtr escene_;
         ompl::geometric::SimpleSetupPtr ess_;
         ompl_interface::ModelBasedPlanningContextPtr econtext_;  ///< Last context.
-
-        bool prerun_{false};
-        bool simplify_{false};
-        bool interpolate_{false};
     };
 }  // namespace pyre
 
