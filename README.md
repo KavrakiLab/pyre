@@ -16,12 +16,12 @@ Please cite our work if you use our code or compare to our approach.
 }
 ```
 
-**Note** This repository will be periodically maintained and updated by the authors to keep the results reproducible and adding new methods. If you have any question/comments please feel free to open an issue, or contact the authors directly.   
+**Note** This repository is periodically maintained and updated by the authors to keep the results reproducible and adding new methods. For question/comments please feel free to open an issue, or contact the authors directly.   
 
 ## 1) Installation 
 Both a dockerfile [Dockerfile](https://github.com/pyre/docker/DockerFile) (1a) and detailed instructions for a native ros workspace installation are provided (1b). If you are not familiar with the ROS infrastructure, using the Docker installation is recommended.
 
-### 1a) Docker 
+### 1a) Docker
    1. You can install docker (if not already installed) on you machine by following the instruictions [here](https://docs.docker.com/get-docker/)
 
    2. Then clone this repository
@@ -34,22 +34,27 @@ Both a dockerfile [Dockerfile](https://github.com/pyre/docker/DockerFile) (1a) a
 
    ```
    cd pyre 
-   ./docker/build-docker.sh
+   sudo ./docker/build-docker.sh
    ```
-
-You can now start an interactive docker session and the follow the instructions from step 2) onwards. The name of the workspace is is in section
+ 
+Now you can start an interactive docker session and follow the instructions from step 2) onwards.
+The name of the workspace is `/ws`
 
 ```
 sudo docker run -it pyre
-
-```
-You can also start docker as a seperate process and send commands like this: 
-
-```
-sudo docker run -t --name pyre_test -d pyre
-sudo docker exec pyre_test /bin/bash -c "source devel/setup.bash"
 ```
 
+#### Minimum steps for reproducing the paper results. 
+You can run a standalone container and send all the commands through the docker interface.   
+```
+sudo docker run --rm -t --name pyre_test -d pyre
+sudo docker exec pyre_test /bin/bash -c "cd ./src/pyre; unzip datasets; unzip database.zip;"
+sudo docker exec pyre_test /bin/bash -c "source devel/setup.bash; nohup roscore &> /dev/null &"
+# This will also detach the processes from the terminal so you can run this headlessly in e.g., in a remote server
+sudo docker exec pyre_test /bin/bash -c "source devel/setup.bash; nohup ./src/pyre/bash_scripts/benchmark.sh &"
+sudo docker exec pyre_test /bin/bash -c "source devel/setup.bash; nohup ./src/pyre/bash_scripts/benchmark_inc.sh &"
+```
+ 
  
 ### 1b) Native 
 
@@ -160,27 +165,6 @@ unzip database.zip
    If you are using the docker image you can copy the results to your host machine using:
    ```
    docker cp pyre:ws/src/pyre/benchmark/shelf_zero/results.db ./ 
-   
-    ```
-   
+   ```
+    
    **Note:** If you are using Python2 and [`ompl_benchmark_statistics.py`](https://github.com/ompl/ompl/blob/master/scripts/ompl_benchmark_statistics.py) does not find pathlib you may have to `apt install python-pathlib2` or `pip install pathlib2`.
-
-##Reproducing the results with Docker
-Go to <location_of_your_workspace>
-```
-
-#Run the container 
-docker run -t --name pyre_test -d pyre
-#Source devel script
-docker exec pyre_test /bin/bash -c "source devel/setup.bash"
-docker exec pyre_test /bin/bash -c "source src/pyre/bash_scripts/benchmark_inc.sh"
-docker exec pyre_test /bin/bash -c "source src/pyre/bash_scripts/benchmark.sh"
-
-#Copy the results over to the host machine
-docker cp pyre:ws/src/pyre/benchmark/shelf_zero/results.db ./ 
-docker cp pyre:ws/src/pyre/benchmark/shelf_zero_rot/results.db ./ 
-docker cp pyre:ws/src/pyre/benchmark/shelf_rot_height/results.db ./ 
-
-```
-
-
