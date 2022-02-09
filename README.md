@@ -122,4 +122,24 @@ unzip database.zip
    
    **Note:** If you are using Python2 and [`ompl_benchmark_statistics.py`](https://github.com/ompl/ompl/blob/master/scripts/ompl_benchmark_statistics.py) does not find pathlib you may have to `apt install python-pathlib2` or `pip install pathlib2`.
 
+##Reproducing the results with Docker
+Go to <location_of_your_workspace>
+```
+#Build the docker image
+./docker/build-docker.sh
+
+#Run the container 
+docker run -t --name pyre_test -d pyre
+#Source devel script
+docker exec pyre_test /bin/bash -c "source devel/setup.bash"
+docker exec pyre_test /bin/bash -c "source src/pyre/bash_scripts/benchmark_inc.sh"
+docker exec pyre_test /bin/bash -c "source src/pyre/bash_scripts/benchmark.sh"
+
+#Copy the results over to the host machine
+docker cp pyre:ws/src/pyre/benchmark/shelf_zero/results.db ./ 
+docker cp pyre:ws/src/pyre/benchmark/shelf_zero_rot/results.db ./ 
+docker cp pyre:ws/src/pyre/benchmark/shelf_rot_height/results.db ./ 
+
+```
+
 

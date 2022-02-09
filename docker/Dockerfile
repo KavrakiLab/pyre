@@ -6,7 +6,7 @@ RUN apt-get update && \
     apt-get install -y software-properties-common && \
     apt-get update && \
     apt-get install -y \
-      build-essential wget pkg-config python-catkin-tools cmake git \
+      build-essential wget pkg-config python-catkin-tools cmake git zip \
       libboost-all-dev libeigen3-dev libtinyxml2-dev libyaml-cpp-dev libhdf5-dev \
       ros-${ROS_DISTRO}-moveit
       
