@@ -100,8 +100,18 @@ int main(int argc, char **argv)
 
     parser::shutdownIfError(exec_name, error);
 
-    auto robot = std::make_shared<rx::FetchRobot>();
-    robot->initialize(false);
+    // Load config.
+    auto config = rx::IO::loadFileToYAML(dataset + "/config.yaml");
+    if (!config.first)
+    {
+        ROS_ERROR("Failed to load YAML file `%s`.", (dataset + "/config.yaml").c_str());
+        return -1;
+    }
+
+    auto robot = std::make_shared<rx::Robot>("robot");
+    robot->initializeFromYAML(config.second["robot_description"].as<std::string>());
+
+    std::string group = config.second["planning_group"].as<std::string>();
     std::string spark_config = "package://pyre/configs/spark_params.yaml";
     std::string flame_config = "package://pyre/configs/flame_params.yaml";
     std::string ompl_config = "package://pyre/configs/ompl_planning.yaml";

@@ -35,7 +35,7 @@
 /* Author: Constantinos Chamzas */
 
 #include <ros/ros.h>
-#include <robowflex_library/detail/fetch.h>
+#include <robowflex_library/robot.h>
 #include <robowflex_library/log.h>
 #include <robowflex_library/builder.h>
 #include <robowflex_library/scene.h>
@@ -70,13 +70,22 @@ int main(int argc, char **argv)
 
     parser::shutdownIfError(exec_name, error);
 
-    auto robot = std::make_shared<rx::FetchRobot>();
-    robot->initialize(false);
-    std::string group = "arm_with_torso";
+    // Load config.
+    auto config = rx::IO::loadFileToYAML(dataset + "/config.yaml");
+    if (!config.first)
+    {
+        ROS_ERROR("Failed to load YAML file `%s`.", (dataset + "/config.yaml").c_str());
+        return -1;
+    }
+
+    auto robot = std::make_shared<rx::Robot>("robot");
+    robot->initializeFromYAML(config.second["robot_description"].as<std::string>());
+
+    std::string group = config.second["planning_group"].as<std::string>();
     std::string spark_config = "package://pyre/configs/spark_params.yaml";
     std::string flame_config = "package://pyre/configs/flame_params.yaml";
 
-    // Save the database in pyre in the last folder in  databases
+    // Save the database in pyre in the last folder in databases
     std::string folder = boost::filesystem::path(rx::IO::resolvePath(dataset)).filename().c_str();
     std::string database = ros::package::getPath("pyre") + "/database/" + folder;
 
