@@ -35,7 +35,7 @@
 /* Author: Constantinos Chamzas */
 
 #include <ros/ros.h>
-#include <robowflex_library/detail/fetch.h>
+#include <robowflex_library/robot.h>
 #include <robowflex_library/log.h>
 #include <robowflex_library/builder.h>
 #include <robowflex_library/scene.h>
