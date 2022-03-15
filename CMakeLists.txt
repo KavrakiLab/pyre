@@ -55,7 +55,6 @@ list(APPEND SOURCES
    src/math.cpp
    src/database.cpp
    src/eplanner.cpp
-   src/ebenchmarking.cpp
    src/distances.cpp
    )
 

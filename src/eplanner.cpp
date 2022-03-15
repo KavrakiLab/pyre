@@ -78,8 +78,6 @@ planning_interface::MotionPlanResponse EPlanner::plan(const robowflex::SceneCons
     else
         ROS_WARN("Planning using Uniform Sampling!");
 
-    econtext_->setInterpolation(interpolate_);
-    econtext_->simplifySolutions(simplify_);
     econtext_->solve(response);
     return response;
 }
@@ -88,15 +86,7 @@ ompl::geometric::SimpleSetupPtr EPlanner::getSS() const
 {
     return ess_;
 }
-void EPlanner::setSimplifySolutions(const bool &flag)
-{
-    simplify_ = flag;
-}
 
-void EPlanner::setInterpolation(const bool &flag)
-{
-    interpolate_ = flag;
-}
 void EPlanner::clearExperience()
 {
     if (exp_)
@@ -114,17 +104,3 @@ const Pyre::Stats EPlanner::getStats() const
     else  // returning empty stats
         return Pyre::Stats();
 }
-
-// void EPlanner::preRun(const robowflex::SceneConstPtr &scene,
-//                      const planning_interface::MotionPlanRequest &request)
-//{
-//    if (not tfile_.empty())
-//    {
-//        econtext_ = getPlanningContext(scene, request);
-//        ess_ = econtext_->getOMPLSimpleSetup();
-//
-//        ROS_WARN("Setting Up Thunder Framework");
-//        static_cast<ompl::tools::Thunder *>(ess_.get())->setFilePath(tfile_);
-//        static_cast<ompl::tools::Thunder *>(ess_.get())->setup();
-//    }
-//}

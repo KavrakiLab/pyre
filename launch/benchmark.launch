@@ -9,7 +9,7 @@
   <arg name="dataset" /> 
   <arg name="database" /> 
   <arg name="planner_name" default="RRTConnectDefault" /> 
-  <arg name="algo" default="0" doc="0:Uniform 1:Spark, 2:Flame"/>
+  <arg name="algo" default="SPARK" doc="UNIFORM, SPARK, FLAME"/>
   <arg name="start" default="1"/> 
   <arg name="end" default="100"/> 
   <arg name="reps" default="1"/> 

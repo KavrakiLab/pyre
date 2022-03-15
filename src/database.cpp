@@ -138,4 +138,3 @@ unsigned int Database::size()
 {
     return nn_->size();
 }
-

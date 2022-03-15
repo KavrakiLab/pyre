@@ -237,8 +237,8 @@ std::vector<Entry *> Spark::createEntries(std::vector<SparkPrimitive *> &primiti
         for (auto &p : primitives)
         {
             // iterate over the local primitives parts (Pairs in this case)
-            auto dist = scene->distanceToObject(state, p->names.first) +
-                        scene->distanceToObject(state, p->names.second);
+            auto dist = scene->distanceToObject(*state, p->names.first) +
+                        scene->distanceToObject(*state, p->names.second);
 
             // If the primitive is close enough to the robot add it to the database.
             if (dist < params_.dpairs)

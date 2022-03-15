@@ -35,12 +35,12 @@
 /* Author: Constantinos Chamzas */
 
 #include <ros/ros.h>
-#include <robowflex_library/detail/fetch.h>
+#include <robowflex_library/robot.h>
 #include <robowflex_library/log.h>
 #include <robowflex_library/builder.h>
 #include <robowflex_library/scene.h>
 #include <robowflex_library/trajectory.h>
-#include <pyre/ebenchmarking.h>
+#include <robowflex_library/benchmarking.h>
 #include <pyre/spark.h>
 #include <pyre/flame.h>
 #include <pyre/database.h>
@@ -54,12 +54,25 @@
 namespace rx = robowflex;
 using namespace pyre;
 
-enum Algo
+rx::Profiler::ComputeMetricCallback getPyreMetricCallBack(const std::string name)
 {
-    UNIFORM = 0,
-    SPARK = 1,
-    FLAME = 2,
-};
+    return [name](const rx::PlannerPtr &planner, const rx::SceneConstPtr &scene,
+                  const planning_interface::MotionPlanRequest &request,
+                  const rx::PlanData &run) -> rx::PlannerMetric {
+        const auto &eplanner = std::dynamic_pointer_cast<const EPlanner>(planner);
+        if (name == "num_local_prims")
+            return eplanner->getStats().num_local_prims;
+        else if (name == "num_local_samplers")
+            return eplanner->getStats().num_local_samplers;
+        else if (name == "ret_time")
+            return eplanner->getStats().ret_time;
+        else if (name == "pure_time")
+            return run.time - eplanner->getStats().ret_time;
+        else
+            ROS_ERROR("Metric name %s does not exist", name.c_str());
+        return 0;
+    };
+}
 
 int main(int argc, char **argv)
 {
@@ -67,8 +80,8 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "benchmark", ros::init_options::AnonymousName);
     ros::NodeHandle node("~");
 
-    int start, end, algo, reps;
-    std::string dataset, database, postfix, planner_name;
+    int start, end, reps;
+    std::string dataset, database, postfix, planner_name, algo;
     double time;
 
     std::string exec_name = "benchmark";
@@ -87,8 +100,18 @@ int main(int argc, char **argv)
 
     parser::shutdownIfError(exec_name, error);
 
-    auto robot = std::make_shared<rx::FetchRobot>();
-    robot->initialize(false);
+    // Load config.
+    auto config = rx::IO::loadFileToYAML(dataset + "/config.yaml");
+    if (!config.first)
+    {
+        ROS_ERROR("Failed to load YAML file `%s`.", (dataset + "/config.yaml").c_str());
+        return -1;
+    }
+
+    auto robot = std::make_shared<rx::Robot>("robot");
+    robot->initializeFromYAML(config.second["robot_description"].as<std::string>());
+
+    std::string group = config.second["planning_group"].as<std::string>();
     std::string spark_config = "package://pyre/configs/spark_params.yaml";
     std::string flame_config = "package://pyre/configs/flame_params.yaml";
     std::string ompl_config = "package://pyre/configs/ompl_planning.yaml";
@@ -97,16 +120,30 @@ int main(int argc, char **argv)
     PyrePtr pyre;
 
     // Load Database and databa
-    if (algo == Algo::SPARK || algo == Algo::FLAME)
+    if (algo == "SPARK" || algo == "FLAME")
     {
         io::loadDatabase(db, database + ".yaml");
-        if (algo == Algo::SPARK)
-            pyre = std::make_shared<Spark>(spark_config, db);
-        else if (algo == Algo::FLAME)
-            pyre = std::make_shared<Flame>(flame_config, db);
+        pyre = (algo == "SPARK" ? pyre = std::make_shared<Spark>(spark_config, db) :
+                                  std::make_shared<Flame>(flame_config, db));
     }
 
-    const auto &bench = std::make_shared<rx::Benchmarker>();
+    // Benchmarker Options
+    rx::Profiler::Options options;
+    options.metrics = rx::Profiler::WAYPOINTS | rx::Profiler::CORRECT | rx::Profiler::LENGTH;
+
+    rx::Experiment experiment("Experiment", options, time, reps);
+    // Add custom metrics
+    for (const auto &metric : {"num_local_prims", "num_local_samplers", "ret_time", "pure_time"})
+        experiment.getProfiler().addMetricCallback(metric, getPyreMetricCallBack(metric));
+
+    // Change default OMPL settings to make planning easier
+    rx::OMPL::Settings settings;
+    // No need to interpolate
+    settings.interpolate_solutions = false;
+    // Simplifying adds planning time
+    settings.simplify_solutions = false;
+    // Since we use joint goals only 1 sample is needed.
+    settings.max_goal_samples = 1;
 
     for (int index = start; index <= end; index++)
     {
@@ -114,61 +151,57 @@ int main(int argc, char **argv)
         const auto &scene_sensed_file = dataset + "scene_sensed" + parser::toString(index) + ".yaml";
         const auto &request_file = dataset + "request" + parser::toString(index) + ".yaml";
 
-        // Create an empty Scene.
+        // Load the geometric Scene.
         auto scene_geom = std::make_shared<rx::Scene>(robot);
         if (not scene_geom->fromYAMLFile(scene_geom_file))
             ROS_ERROR("Failed to read file: %s for scene", scene_geom_file.c_str());
 
-        // Create an empty Scene.
+        // Load the sensed Scene (Only used by FLAME).
         auto scene_sensed = std::make_shared<rx::Scene>(robot);
-        if (algo == Algo::FLAME)
+        if (algo == "FLAME")
             if (not scene_sensed->fromYAMLFile(scene_sensed_file))
                 ROS_ERROR("Failed to read file: %s for scene", scene_sensed_file.c_str());
 
-        // Create an empty motion planning request.
+        // Create the motion planning request.
         auto request = std::make_shared<robowflex::MotionRequestBuilder>(robot);
         if (not request->fromYAMLFile(request_file))
             ROS_ERROR("Failed to read file: %s for request", request_file.c_str());
 
+        // Set the planner name e.g., RRTConnect.
         request->setConfig(planner_name);
+        // Only use one thread for planning.
         request->setNumPlanningAttempts(1);
+        // Set the allowble planning time.
         request->setAllowedPlanningTime(time);
 
         EPlannerPtr planner;
         // Individual changes for every planner
-        switch (algo)
-        {
-            case Algo::UNIFORM:
-                planner = std::make_shared<EPlanner>(robot, "Uniform_" + planner_name + postfix);
-                break;
-            case Algo::SPARK:
-                planner =
-                    std::make_shared<EPlanner>(robot, "SPARK_" + planner_name + postfix, pyre, scene_geom);
-                break;
-            case Algo::FLAME:
-                planner =
-                    std::make_shared<EPlanner>(robot, "FLAME_" + planner_name + postfix, pyre, scene_sensed);
-                break;
-            default:
-                ROS_ERROR("Algo can have value only in {0,1,2}");
-        }
+        if (algo == "UNIFORM")
+            planner = std::make_shared<EPlanner>(robot, "UNIFORM_" + planner_name + postfix);
+        else if (algo == "SPARK")
+            planner = std::make_shared<EPlanner>(robot, "SPARK_" + planner_name + postfix, pyre, scene_geom);
+        else if (algo == "FLAME")
+            planner =
+                std::make_shared<EPlanner>(robot, "FLAME_" + planner_name + postfix, pyre, scene_sensed);
+        else
+            ROS_ERROR("Chosen Sampling Strategy can only be UNIFORM, SPARK, FLAME");
 
-        planner->initialize(ompl_config);
-        bench->addBenchmarkingRequest("result" + parser::toString(index), scene_geom, planner, request);
+        planner->initialize(ompl_config, settings);
+        experiment.addQuery(planner->getName(), scene_geom, planner, request);
     }
-
     // The dataset name is the last folder of the dataset path.
     std::string folder = boost::filesystem::path(rx::IO::resolvePath(dataset)).filename().c_str();
-    std::string bpath = ros::package::getPath("pyre") + "/benchmark/" + folder + "/";
+    std::string bpath = ros::package::getPath("pyre") + "/benchmark/" + folder + "/" + algo;
 
-    ROS_INFO("Starting Benhmarking");
+    ROS_INFO("Starting Benchmarking");
 
-    const auto &options = rx::Benchmarker::Options(reps, 0);
-    bench->benchmark({std::make_shared<EBenchmarkOutputter>(bpath)}, options);
+    auto results_data = experiment.benchmark(1);
+
+    rx::OMPLPlanDataSetOutputter output(bpath);
+    output.dump(*results_data);
 
     ROS_INFO("Testing for %s is with %s complete", dataset.c_str(), database.c_str());
     ros::shutdown();
 
     return 0;
 }
-
