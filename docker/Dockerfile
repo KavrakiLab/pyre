@@ -18,7 +18,7 @@ WORKDIR /ws/src
 RUN git clone --depth 1 https://github.com/KavrakiLab/robowflex_resources
 
 #Clone pyre 
-RUN git clone --depth 1 --branch new-robowflex-api https://github.com/KavrakiLab/pyre
+RUN git clone --depth 1 https://github.com/KavrakiLab/pyre
 
 #Clone only robowflex_library and robowflex_ompl instead of all of robowflex
 WORKDIR /ws
