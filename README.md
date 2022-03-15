@@ -41,7 +41,7 @@ Now you can start an interactive docker session and follow the instructions from
 The name of the workspace is `/ws`
 
 ```
-sudo docker run -it --name pyre_test pyre
+sudo docker run --rm -it --name pyre_test pyre
 ```
 
 #### Minimum steps for reproducing the paper results. 
