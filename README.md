@@ -41,17 +41,21 @@ Now you can start an interactive docker session and follow the instructions from
 The name of the workspace is `/ws`
 
 ```
-sudo docker run -it pyre
+sudo docker run -it --name pyre_test pyre
 ```
 
 #### Minimum steps for reproducing the paper results. 
-You can run a standalone container and send all the commands through the docker interface.   
+You can run the following commands to quickly reproduce the results. For a more detailed understaning follows the instructions from step 2) onwards. 
+You can use docker to run a standalone container and send all the commands through the docker interface.   
 ```
 sudo docker run --rm -t --name pyre_test -d pyre
 sudo docker exec pyre_test /bin/bash -c "cd ./src/pyre; unzip datasets; unzip database.zip;"
 sudo docker exec pyre_test /bin/bash -c "source devel/setup.bash; nohup roscore &> /dev/null &"
+
 # This will also detach the processes from the terminal so you can run this headlessly in e.g., in a remote server
+#To recreate the results of Figure 4b) 
 sudo docker exec pyre_test /bin/bash -c "source devel/setup.bash; nohup ./src/pyre/bash_scripts/benchmark.sh &"
+#To recreate the results of Figure 4c) 
 sudo docker exec pyre_test /bin/bash -c "source devel/setup.bash; nohup ./src/pyre/bash_scripts/benchmark_inc.sh &"
 ```
  
@@ -154,17 +158,22 @@ unzip database.zip
          ./bash_scripts/benchmark_inc.sh 
          ```
 
-3. To plot the results use the `unify.sh` script to aggregate the benchmarking results for each dataset. `bench_inc.sh`  the shelf_height_rot dataset
+3. To plot the results use the `ompl_benchmark_statistics.py` script to aggregate the benchmarking results for each dataset. `bench_inc.sh`  the shelf_height_rot dataset
    ```
-   ./benchmark/unify.sh shelf_zero_test results
-   ./benchmark/unify.sh shelf_height_test results
-   ./benchmark/unify.sh shelf_height_rot_test results
+   #Go to the benchmarking folder
+   cd benchmark
+   #Call the ompl script to aggregate the results in an SQL database
+   python3 ompl_benchmark_statistics.py shelf_zero_test/*.log -d shelf_zero_test_results.db
+   python3 ompl_benchmark_statistics.py shelf_zero_test/*.log -d shelf_height_test_results.db
+   python3 ompl_benchmark_statistics.py shelf_zero_test/*.log -d shelf_zero_height_test_results.db
    ```
    A `<dataset>\_results.db` is generated for each dataset under the `benchmark/` folder. You can load these files in  [Planner Arena](http://plannerarena.org/) to plot the results.
 
-   If you are using the docker image you can copy the results to your host machine using:
+   If you are using the docker image you can copy the results to your host machine with:
    ```
-   docker cp pyre:ws/src/pyre/benchmark/shelf_zero/results.db ./ 
+   docker cp pyre_test:/ws/src/pyre/benchmark/shelf_zero_test_results.db ./ 
+   docker cp pyre_test:/ws/src/pyre/benchmark/shelf_zero_test_results.db ./
+   docker cp pyre_test:/ws/src/pyre/benchmark/shelf_zero_test_results.db ./
    ```
     
    **Note:** If you are using Python2 and [`ompl_benchmark_statistics.py`](https://github.com/ompl/ompl/blob/master/scripts/ompl_benchmark_statistics.py) does not find pathlib you may have to `apt install python-pathlib2` or `pip install pathlib2`.
