@@ -131,7 +131,7 @@ int main(int argc, char **argv)
     rx::Profiler::Options options;
     options.metrics = rx::Profiler::WAYPOINTS | rx::Profiler::CORRECT | rx::Profiler::LENGTH;
 
-    rx::Experiment experiment("Experiment" + postfix, options, time, reps);
+    rx::Experiment experiment("Experiment", options, time, reps);
     // Add custom metrics
     for (const auto &metric : {"num_local_prims", "num_local_samplers", "ret_time", "pure_time"})
         experiment.getProfiler().addMetricCallback(metric, getPyreMetricCallBack(metric));
