@@ -61,14 +61,14 @@ sudo docker exec pyre_test /bin/bash -c "source devel/setup.bash; nohup ./src/py
 sudo docker exec pyre_test /bin/bash -c "source devel/setup.bash; nohup ./src/pyre/bash_scripts/benchmark_inc.sh &"
 
 #Aggregate the results
-sudo docker exec pyre_test /bin/bash -c "python3 ompl_benchmark_statistics.py shelf_zero_test/*.log -d shelf_zero_test_results.db"
-sudo docker exec pyre_test /bin/bash -c "python3 ompl_benchmark_statistics.py shelf_height_test/*.log -d shelf_height_test_results.db"
-sudo docker exec pyre_test /bin/bash -c "python3 ompl_benchmark_statistics.py shelf_zero_height_test/*.log -d shelf_height_rot_test_results.db"
+sudo docker exec pyre_test /bin/bash -c "cd ./src/pyre/benchmark; python3 ompl_benchmark_statistics.py shelf_zero_test/*.log -d shelf_zero_test_results.db"
+sudo docker exec pyre_test /bin/bash -c "cd ./src/pyre/benchmark; python3 ompl_benchmark_statistics.py shelf_height_test/*.log -d shelf_height_test_results.db"
+sudo docker exec pyre_test /bin/bash -c "cd ./src/pyre/benchmark; python3 ompl_benchmark_statistics.py shelf_zero_height_test/*.log -d shelf_height_rot_test_results.db"
 
 #Copy the results back to the host machine
-docker cp pyre_test:/ws/src/pyre/benchmark/shelf_zero_test_results.db ./ 
-docker cp pyre_test:/ws/src/pyre/benchmark/shelf_height_test_results.db ./
-docker cp pyre_test:/ws/src/pyre/benchmark/shelf_height_rot_test_results.db ./
+sudo docker cp pyre_test:/ws/src/pyre/benchmark/shelf_zero_test_results.db ./ 
+sudo docker cp pyre_test:/ws/src/pyre/benchmark/shelf_height_test_results.db ./
+sudo docker cp pyre_test:/ws/src/pyre/benchmark/shelf_height_rot_test_results.db ./
 ```
 You can visualize the results by loading the `.db` files to plannerarena [Planner Arena](http://plannerarena.org/)
  
