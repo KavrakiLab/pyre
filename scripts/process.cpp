@@ -58,7 +58,7 @@ int main(int argc, char **argv)
     ros::NodeHandle node("~");
 
     int start, end;
-    std::string dataset;
+    std::string dataset, database;
 
     std::string exec_name = "trainer";
 
@@ -67,6 +67,7 @@ int main(int argc, char **argv)
     error += !parser::get(exec_name, node, "start", start);
     error += !parser::get(exec_name, node, "end", end);
     error += !parser::get(exec_name, node, "dataset", dataset);
+    error += !parser::get(exec_name, node, "database", database);
 
     parser::shutdownIfError(exec_name, error);
 
@@ -82,6 +83,7 @@ int main(int argc, char **argv)
     robot->initializeFromYAML(config.second["robot_description"].as<std::string>());
 
     std::string group = config.second["planning_group"].as<std::string>();
+    std::string num_samples = config.second["num_samples"].as<int>();
     std::string spark_config = "package://pyre/configs/spark_params.yaml";
     std::string flame_config = "package://pyre/configs/flame_params.yaml";
 

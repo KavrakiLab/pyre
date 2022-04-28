@@ -5,7 +5,8 @@
   <arg unless="$(arg debug)" name="launch_prefix" value="" />
   <arg if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
 
-  <arg name="dataset" default="/home/chamzask/Desktop/datasets/shelf_zero/" /> 
+  <arg name="dataset" default="package://pyre/datasets/shelf_zero/" /> 
+  <arg name="database" default="package://pyre/datasets/shelf_zero/" /> 
   <arg name="start" default="1"/> 
   <arg name="end" default="10"/> 
 
