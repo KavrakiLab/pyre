@@ -87,13 +87,9 @@ int main(int argc, char **argv)
     std::string flame_config = "package://pyre/configs/flame_params.yaml";
 
     // get the number of preapending zeros (minimum 4)
-    int num_samples = config.second["num_samples"].as<int>();
+    int num_samples = config.second["samples"].as<int>();
     int dwidth = int(log10(num_samples)) + 1;
     dwidth = dwidth > 4 ? dwidth : 4;
-
-    // Save the database in pyre in the last folder in databases
-    // std::string folder = boost::filesystem::path(rx::IO::resolvePath(dataset)).filename().c_str();
-    // std::string database = ros::package::getPath("pyre") + "/database/" + folder;
 
     auto spark = std::make_shared<Spark>(spark_config);
     auto flame = std::make_shared<Flame>(flame_config);

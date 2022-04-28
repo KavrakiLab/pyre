@@ -13,6 +13,7 @@
   <!-- Start the train node -->
   <node name="$(anon processor)" launch-prefix="$(arg launch_prefix)" pkg="pyre" type="process" output="screen"> 
       <param name="dataset" value="$(arg dataset)"/>
+      <param name="database" value="$(arg database)"/>
       <param name="start" value="$(arg start)"/>
       <param name="end" value="$(arg end)"/>
   </node>
