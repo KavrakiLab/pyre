@@ -9,12 +9,14 @@
   <arg name="database" default="package://pyre/database/shelf_zero"/> 
   <arg name="start" default="1"/> 
   <arg name="end" default="10"/> 
+  <arg name="dwidth" default="4"/> 
 
   <!-- Start the train node -->
   <node name="$(anon merger)" launch-prefix="$(arg launch_prefix)" pkg="pyre" type="merge" output="screen" > 
       <param name="database" value="$(arg database)"/>
       <param name="start" value="$(arg start)"/>
       <param name="end" value="$(arg end)"/>
+      <param name="dwidth" value="$(arg dwidth)"/>
   </node>
   
 </launch>
