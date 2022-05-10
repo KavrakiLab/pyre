@@ -58,7 +58,7 @@ int main(int argc, char **argv)
     ros::NodeHandle node("~");
 
     int start, end, dwidth;
-    std::string database;
+    std::string database, database_out;
 
     std::string exec_name = "merger";
 
@@ -67,8 +67,12 @@ int main(int argc, char **argv)
     error += !parser::get(exec_name, node, "start", start);
     error += !parser::get(exec_name, node, "end", end);
     error += !parser::get(exec_name, node, "database", database);
+    error += !parser::get(exec_name, node, "database_out", database);
     // dwidth is the number of digits for the index number. It is needed to correctly read the files.
     error += !parser::get(exec_name, node, "dwidth", dwidth);
+
+    if (database_out.empty())
+        database_out = database;
 
     parser::shutdownIfError(exec_name, error);
 
