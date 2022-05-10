@@ -90,10 +90,10 @@ int main(int argc, char **argv)
         db_flame->add(entries_flame);
     }
 
-    io::storeDatabase(db_spark, database + "/sparkdb" + parser::toString(start) + "_" +
+    io::storeDatabase(db_spark, database_out + "/sparkdb" + parser::toString(start) + "_" +
                                     parser::toString(end) + ".yaml");
 
-    io::storeDatabase(db_flame, database + "/flamedb" + parser::toString(start) + "_" +
+    io::storeDatabase(db_flame, database_out + "/flamedb" + parser::toString(start) + "_" +
                                     parser::toString(end) + ".yaml");
 
     ROS_INFO("Merging for %s is complete", database.c_str());
