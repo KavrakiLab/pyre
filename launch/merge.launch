@@ -18,7 +18,7 @@
   <!-- Start the train node -->
   <node name="$(anon merger)" launch-prefix="$(arg launch_prefix)" pkg="pyre" type="merge" output="screen" required="$(arg required)"> 
       <param name="database" value="$(arg database)"/>
-      <param name="database" value="$(arg database_out)"/>
+      <param name="database_out" value="$(arg database_out)"/>
       <param name="start" value="$(arg start)"/>
       <param name="end" value="$(arg end)"/>
       <param name="dwidth" value="$(arg dwidth)"/>

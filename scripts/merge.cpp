@@ -67,7 +67,7 @@ int main(int argc, char **argv)
     error += !parser::get(exec_name, node, "start", start);
     error += !parser::get(exec_name, node, "end", end);
     error += !parser::get(exec_name, node, "database", database);
-    error += !parser::get(exec_name, node, "database_out", database);
+    error += !parser::get(exec_name, node, "database_out", database_out);
     // dwidth is the number of digits for the index number. It is needed to correctly read the files.
     error += !parser::get(exec_name, node, "dwidth", dwidth);
 
