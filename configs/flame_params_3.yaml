@@ -1,0 +1,4 @@
+sigma: 0.2
+lambda: 0.3
+octo_max_depth: 16 
+octo_min_depth: 14 
