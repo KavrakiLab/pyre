@@ -57,8 +57,8 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "merge", ros::init_options::AnonymousName);
     ros::NodeHandle node("~");
 
-    int start, end;
-    std::string database;
+    int start, end, dwidth;
+    std::string database, database_out;
 
     std::string exec_name = "merger";
 
@@ -67,6 +67,12 @@ int main(int argc, char **argv)
     error += !parser::get(exec_name, node, "start", start);
     error += !parser::get(exec_name, node, "end", end);
     error += !parser::get(exec_name, node, "database", database);
+    error += !parser::get(exec_name, node, "database_out", database_out);
+    // dwidth is the number of digits for the index number. It is needed to correctly read the files.
+    error += !parser::get(exec_name, node, "dwidth", dwidth);
+
+    if (database_out.empty())
+        database_out = database;
 
     parser::shutdownIfError(exec_name, error);
 
@@ -76,18 +82,18 @@ int main(int argc, char **argv)
     for (int index = start; index <= end; index++)
     {
         std::vector<Entry *> entries_spark;
-        io::loadEntries(entries_spark, database + "/sparkdb" + parser::toString(index) + ".yaml");
+        io::loadEntries(entries_spark, database + "/sparkdb" + parser::toString(index, dwidth) + ".yaml");
         db_spark->add(entries_spark);
 
         std::vector<Entry *> entries_flame;
-        io::loadEntries(entries_flame, database + "/flamedb" + parser::toString(index) + ".yaml");
+        io::loadEntries(entries_flame, database + "/flamedb" + parser::toString(index, dwidth) + ".yaml");
         db_flame->add(entries_flame);
     }
 
-    io::storeDatabase(db_spark, database + "/sparkdb" + parser::toString(start) + "_" +
+    io::storeDatabase(db_spark, database_out + "/sparkdb" + parser::toString(start) + "_" +
                                     parser::toString(end) + ".yaml");
 
-    io::storeDatabase(db_flame, database + "/flamedb" + parser::toString(start) + "_" +
+    io::storeDatabase(db_flame, database_out + "/flamedb" + parser::toString(start) + "_" +
                                     parser::toString(end) + ".yaml");
 
     ROS_INFO("Merging for %s is complete", database.c_str());

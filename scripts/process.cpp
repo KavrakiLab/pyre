@@ -58,7 +58,7 @@ int main(int argc, char **argv)
     ros::NodeHandle node("~");
 
     int start, end;
-    std::string dataset;
+    std::string dataset, database;
 
     std::string exec_name = "trainer";
 
@@ -67,6 +67,7 @@ int main(int argc, char **argv)
     error += !parser::get(exec_name, node, "start", start);
     error += !parser::get(exec_name, node, "end", end);
     error += !parser::get(exec_name, node, "dataset", dataset);
+    error += !parser::get(exec_name, node, "database", database);
 
     parser::shutdownIfError(exec_name, error);
 
@@ -85,19 +86,20 @@ int main(int argc, char **argv)
     std::string spark_config = "package://pyre/configs/spark_params.yaml";
     std::string flame_config = "package://pyre/configs/flame_params.yaml";
 
-    // Save the database in pyre in the last folder in databases
-    std::string folder = boost::filesystem::path(rx::IO::resolvePath(dataset)).filename().c_str();
-    std::string database = ros::package::getPath("pyre") + "/database/" + folder;
+    // get the number of preapending zeros (minimum 4)
+    int num_samples = config.second["samples"].as<int>();
+    int dwidth = int(log10(num_samples)) + 1;
+    dwidth = dwidth > 4 ? dwidth : 4;
 
     auto spark = std::make_shared<Spark>(spark_config);
     auto flame = std::make_shared<Flame>(flame_config);
 
     for (int index = start; index <= end; index++)
     {
-        const auto &scene_geom_file = dataset + "scene" + parser::toString(index) + ".yaml";
-        const auto &scene_sensed_file = dataset + "scene_sensed" + parser::toString(index) + ".yaml";
-        const auto &request_file = dataset + "request" + parser::toString(index) + ".yaml";
-        const auto &traj_file = dataset + "path" + parser::toString(index) + ".yaml";
+        const auto &scene_geom_file = dataset + "scene" + parser::toString(index, dwidth) + ".yaml";
+        const auto &scene_sensed_file = dataset + "scene_sensed" + parser::toString(index, dwidth) + ".yaml";
+        const auto &request_file = dataset + "request" + parser::toString(index, dwidth) + ".yaml";
+        const auto &traj_file = dataset + "path" + parser::toString(index, dwidth) + ".yaml";
 
         // Create an empty Scene.
         auto scene_geom = std::make_shared<rx::Scene>(robot);
@@ -133,12 +135,12 @@ int main(int argc, char **argv)
         // Create spark entries
         auto entries_spark = spark->processExperience(trajectory, scene_geom, request);
         // Store spark entries
-        io::storeEntries(entries_spark, database + "/sparkdb" + parser::toString(index) + ".yaml");
+        io::storeEntries(entries_spark, database + "/sparkdb" + parser::toString(index, dwidth) + ".yaml");
 
         // Create spark entries
         auto entries_flame = flame->processExperience(trajectory, scene_sensed, request);
         // Store spark entries ROS_INFO("Training for %s is complete", dataset.c_str());
-        io::storeEntries(entries_flame, database + "/flamedb" + parser::toString(index) + ".yaml");
+        io::storeEntries(entries_flame, database + "/flamedb" + parser::toString(index, dwidth) + ".yaml");
     }
 
     ros::shutdown();

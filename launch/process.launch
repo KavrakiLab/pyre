@@ -5,13 +5,18 @@
   <arg unless="$(arg debug)" name="launch_prefix" value="" />
   <arg if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
 
-  <arg name="dataset" default="/home/chamzask/Desktop/datasets/shelf_zero/" /> 
+  <!-- kill roscore on exit  -->
+  <arg name="required" default="false"/> 
+
+  <arg name="dataset" default="package://pyre/datasets/shelf_zero/" /> 
+  <arg name="database" default="package://pyre/datasets/shelf_zero/" /> 
   <arg name="start" default="1"/> 
   <arg name="end" default="10"/> 
 
   <!-- Start the train node -->
-  <node name="$(anon processor)" launch-prefix="$(arg launch_prefix)" pkg="pyre" type="process" output="screen"> 
+  <node name="$(anon processor)" launch-prefix="$(arg launch_prefix)" pkg="pyre" type="process" output="screen" required="$(arg required)"> 
       <param name="dataset" value="$(arg dataset)"/>
+      <param name="database" value="$(arg database)"/>
       <param name="start" value="$(arg start)"/>
       <param name="end" value="$(arg end)"/>
   </node>
