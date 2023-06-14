@@ -81,11 +81,11 @@ int main(int argc, char **argv)
 
     for (int index = start; index <= end; index++)
     {
-        std::vector<Entry *> entries_spark;
+        std::vector<EntryPtr> entries_spark;
         io::loadEntries(entries_spark, database + "/sparkdb" + parser::toString(index, dwidth) + ".yaml");
         db_spark->add(entries_spark);
 
-        std::vector<Entry *> entries_flame;
+        std::vector<EntryPtr> entries_flame;
         io::loadEntries(entries_flame, database + "/flamedb" + parser::toString(index, dwidth) + ".yaml");
         db_flame->add(entries_flame);
     }

@@ -65,7 +65,7 @@ namespace pyre
         std::pair<robowflex::GeometryPtr, robowflex::GeometryPtr> geometries;  // the geometries in the
         std::pair<robowflex::RobotPose, robowflex::RobotPose> poses;           // the poses of the geometries
         std::pair<std::string, std::string> names;                             // the poses of the geometries
-        double distance(Primitive *other);
+        double distance(PrimitivePtr other);
         std::string getUID();
     };
 
@@ -100,16 +100,16 @@ namespace pyre
          */
         ~Spark();
 
-        std::vector<Entry *>
+        std::vector<EntryPtr>
         processExperience(const robowflex::TrajectoryConstPtr &traj, const robowflex::SceneConstPtr &scene,
                           const robowflex::MotionRequestBuilderConstPtr &request) override;
 
         /** \brief gets all the primitives from the current Scene
          */
-        std::vector<SparkPrimitive *> extractPrimitives(const robowflex::SceneConstPtr &scene);
+        std::vector<SparkPrimitivePtr> extractPrimitives(const robowflex::SceneConstPtr &scene);
 
         /** \brief Creates the entries for the given primitives, */
-        std::vector<Entry *> createEntries(std::vector<SparkPrimitive *> &primitives,
+        std::vector<EntryPtr> createEntries(std::vector<SparkPrimitivePtr> &primitives,
                                            const robowflex::TrajectoryConstPtr &traj,
                                            const robowflex::SceneConstPtr &scene);
 

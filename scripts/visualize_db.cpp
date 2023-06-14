@@ -70,7 +70,7 @@ enum Show
     DB = 1,
 };
 
-visualization_msgs::Marker createFlameMarker(FlamePrimitive *prim, Eigen::Vector4d color, rx::RobotPose,
+visualization_msgs::Marker createFlameMarker(FlamePrimitivePtr prim, Eigen::Vector4d color, rx::RobotPose,
                                              Eigen::Vector3d scale)
 {
     visualization_msgs::Marker marker;
@@ -213,14 +213,14 @@ int main(int argc, char **argv)
     {
         auto db = std::make_shared<Database>();
         io::loadDatabase(db, database + ".yaml");
-        std::vector<Entry *> entries;
+        std::vector<EntryPtr> entries;
         db->toList(entries);
 
         for (const auto &e : entries)
         {
             if (algo == Algo::SPARK)
             {
-                auto prim = static_cast<SparkPrimitive *>(e->key);
+                auto prim = std::static_pointer_cast<SparkPrimitive>(e->key);
                 rviz->addGeometryMarker(prim->names.first, prim->geometries.first, "map", prim->poses.first,
                                         voxel_color);
                 rviz->addGeometryMarker(prim->names.first, prim->geometries.first, "map", prim->poses.first,
@@ -232,7 +232,7 @@ int main(int argc, char **argv)
             }
             else if (algo == Algo::FLAME)
             {
-                auto prim = static_cast<FlamePrimitive *>(e->key);
+                auto prim = std::static_pointer_cast<FlamePrimitive>(e->key);
                 auto marker = createFlameMarker(prim, voxel_color, prim->pose,
                                                 {prim->voxel_res, prim->voxel_res, prim->voxel_res});
                 rviz->addMarker(marker, prim->getUID());
