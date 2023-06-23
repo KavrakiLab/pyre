@@ -288,7 +288,7 @@ namespace
         return node;
     }
 
-    const YAML::Node SparkPrimitiveToYAML(const SparkPrimitivePtr prim)
+    const YAML::Node SparkPrimitiveToYAML(SparkPrimitiveConstPtr prim)
     {
         YAML::Node node;
         node["geometries"].push_back(GeometryToYAML(prim->geometries.first));
@@ -299,7 +299,7 @@ namespace
         return node;
     }
 
-    const YAML::Node FlamePrimitiveToYAML(const FlamePrimitivePtr prim)
+    const YAML::Node FlamePrimitiveToYAML(FlamePrimitiveConstPtr prim)
     {
         YAML::Node node;
         node["voxel_res"] = prim->voxel_res;
@@ -310,7 +310,7 @@ namespace
         return node;
     }
 
-    const YAML::Node EntryToYAML(const EntryPtr entry)
+    const YAML::Node EntryToYAML(EntryConstPtr entry)
     {
         YAML::Node node;
         auto spark_key = std::dynamic_pointer_cast<SparkPrimitive>(entry->key);
