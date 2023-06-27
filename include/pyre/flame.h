@@ -60,7 +60,7 @@ namespace pyre
         robowflex::RobotPose pose;  // the pose of the occupancy grid.
         bool ***grid;               // a 3D local occupancy grid.
 
-        double distance(Primitive *other);
+        double distance(PrimitivePtr other);
         std::string getUID();
     };
 
@@ -94,7 +94,7 @@ namespace pyre
          */
         ~Flame();
 
-        std::vector<Entry *>
+        std::vector<EntryPtr>
         processExperience(const robowflex::TrajectoryConstPtr &traj, const robowflex::SceneConstPtr &scene,
                           const robowflex::MotionRequestBuilderConstPtr &request) override;
 
@@ -105,10 +105,10 @@ namespace pyre
                                            const unsigned int size, const double res);
 
         /** \brief gets all the primitives from the current Scene. */
-        std::vector<FlamePrimitive *> extractPrimitives(const robowflex::SceneConstPtr &scene);
+        std::vector<FlamePrimitivePtr> extractPrimitives(const robowflex::SceneConstPtr &scene);
 
         /** \brief Creates the entries for the given primitives. */
-        std::vector<Entry *> createEntries(std::vector<FlamePrimitive *> &primitives,
+        std::vector<EntryPtr> createEntries(std::vector<FlamePrimitivePtr> &primitives,
                                            const robowflex::TrajectoryConstPtr &traj,
                                            const robowflex::SceneConstPtr &scene);
 

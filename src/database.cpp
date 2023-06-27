@@ -39,11 +39,11 @@
 
 using namespace pyre;
 
-Entry::Entry::Entry(Primitive *p) : key(p)
+Entry::Entry::Entry(PrimitivePtr p) : key(p)
 {
 }
 
-Entry::Entry(Primitive *p, std::vector<double> vec) : key(p)
+Entry::Entry(PrimitivePtr p, std::vector<double> vec) : key(p)
 {
     Eigen::Map<Eigen::VectorXd> x(vec.data(), vec.size());
     value.emplace_back(x);
@@ -51,16 +51,16 @@ Entry::Entry(Primitive *p, std::vector<double> vec) : key(p)
 
 Entry::~Entry()
 {
-    delete key;
+    // delete key; // handled by shared_ptr now
 }
 
 Database::Database()
 {
-    nn_ = std::make_shared<ompl::NearestNeighborsGNAT<Entry *>>();
-    nn_->setDistanceFunction([&](Entry *a, Entry *b) { return a->key->distance(b->key); });
+    nn_ = std::make_shared<ompl::NearestNeighborsGNAT<EntryPtr>>();
+    nn_->setDistanceFunction([&](EntryPtr a, EntryPtr b) { return a->key->distance(b->key); });
 }
 
-std::vector<Eigen::VectorXd> Database::vectorize(std::vector<Entry *> entries)
+std::vector<Eigen::VectorXd> Database::vectorize(std::vector<EntryPtr> entries)
 {
     std::vector<Eigen::VectorXd> values;
     for (const auto &e : entries)
@@ -70,14 +70,14 @@ std::vector<Eigen::VectorXd> Database::vectorize(std::vector<Entry *> entries)
     return values;
 }
 
-void Database::add(Entry *e)
+void Database::add(EntryPtr e)
 {
     bool unique = set_.insert(e->key->getUID()).second;
 
     if (not unique)
     {
         // Find the same entry in the db and add combine the local samplers
-        Entry *t = nearest(e);
+        EntryPtr t = nearest(e);
         for (const auto &val : e->value)
             t->value.emplace_back(val);
     }
@@ -85,34 +85,34 @@ void Database::add(Entry *e)
         nn_->add(e);
 }
 
-void Database::add(std::vector<Entry *> entries)
+void Database::add(std::vector<EntryPtr> entries)
 {
     for (const auto &e : entries)
         this->add(e);
 }
 
-Entry *Database::nearest(Entry *e)
+EntryPtr Database::nearest(EntryPtr e)
 {
     return nn_->nearest(e);
 }
 
-void Database::nearestR(Entry *e, double r, std::vector<Entry *> &list)
+void Database::nearestR(EntryPtr e, double r, std::vector<EntryPtr> &list)
 {
-    std::vector<Entry *> tlist;
+    std::vector<EntryPtr> tlist;
     nn_->nearestR(e, r, tlist);
 
     list.reserve(list.size() + tlist.size());
     list.insert(list.end(), tlist.begin(), tlist.end());
 }
 
-void Database::toList(std::vector<Entry *> &list)
+void Database::toList(std::vector<EntryPtr> &list)
 {
     nn_->list(list);
 }
 
 void Database::printMetrics(std::ostream &os)
 {
-    std::vector<Entry *> list;
+    std::vector<EntryPtr> list;
     this->toList(list);
     auto values = this->vectorize(list);
 

@@ -48,23 +48,26 @@ namespace pyre
 {
     /** \cond IGNORE */
     CLASS_FORWARD(Database);
+    CLASS_FORWARD(Primitive);
+    CLASS_FORWARD(Entry);
+
     /** \endcond */
 
     /** Brief The primitive for spark (pairs of obstacles) **/
     class Primitive
     {
     public:
-        virtual double distance(Primitive *other) = 0;
+        virtual double distance(PrimitivePtr other) = 0;
         virtual std::string getUID() = 0;
         virtual ~Primitive(){};
     };
 
     struct Entry
     {
-        Primitive *key;
+        PrimitivePtr key;
         std::vector<Eigen::VectorXd> value;
-        Entry(Primitive *p);
-        Entry(Primitive *p, std::vector<double> vec);
+        Entry(PrimitivePtr p);
+        Entry(PrimitivePtr p, std::vector<double> vec);
         ~Entry();
     };
 
@@ -73,22 +76,22 @@ namespace pyre
     public:
         Database();
 
-        std::vector<Eigen::VectorXd> vectorize(std::vector<Entry *> entries);
+        std::vector<Eigen::VectorXd> vectorize(std::vector<EntryPtr > entries);
 
         /** \brief adds a single entry to the database structure, combining local samplers of same entries */
-        void add(Entry *e);
+        void add(EntryPtr e);
 
         /** \brief adds many entries in the database structure, combining local samplers of same entries */
-        void add(std::vector<Entry *> entries);
+        void add(std::vector<EntryPtr> entries);
 
         /** \brief Returns the nearest entry in the database */
-        Entry *nearest(Entry *e);
+        EntryPtr nearest(EntryPtr e);
 
         /** \brief Returns the nearest entries within Radius \a r */
-        void nearestR(Entry *e, double r, std::vector<Entry *> &list);
+        void nearestR(EntryPtr e, double r, std::vector<EntryPtr> &list);
 
         /** \brief gets all the entries as a list. */
-        void toList(std::vector<Entry *> &list);
+        void toList(std::vector<EntryPtr> &list);
 
         /** \brief Prints the metrics of the database. */
         void printMetrics(std::ostream &os);
@@ -103,7 +106,7 @@ namespace pyre
         unsigned int size();
 
     private:
-        std::shared_ptr<ompl::NearestNeighbors<Entry *>> nn_;
+        std::shared_ptr<ompl::NearestNeighbors<EntryPtr>> nn_;
         std::unordered_set<std::string> set_;
     };
 }  // namespace pyre

@@ -53,9 +53,9 @@ SparkPrimitive::SparkPrimitive()
 {
 }
 
-double SparkPrimitive::distance(Primitive *o)
+double SparkPrimitive::distance(PrimitivePtr o)
 {
-    auto other = static_cast<SparkPrimitive *>(o);
+    auto other = std::static_pointer_cast<SparkPrimitive>(o);
     double dista = dist::transformDistance(poses.first, other->poses.first, 0.75) +
                    dist::transformDistance(poses.second, other->poses.second, 0.75) +
                    dist::geometryDistance(geometries.first, other->geometries.first) +
@@ -133,7 +133,7 @@ Spark::~Spark()
     db_->clear();
 }
 
-std::vector<Entry *> Spark::processExperience(const robowflex::TrajectoryConstPtr &traj,
+std::vector<EntryPtr> Spark::processExperience(const robowflex::TrajectoryConstPtr &traj,
                                               const robowflex::SceneConstPtr &scene,
                                               const robowflex::MotionRequestBuilderConstPtr &request)
 {
@@ -142,9 +142,9 @@ std::vector<Entry *> Spark::processExperience(const robowflex::TrajectoryConstPt
     return new_entries;
 }
 
-std::vector<SparkPrimitive *> Spark::extractPrimitives(const robowflex::SceneConstPtr &scene)
+std::vector<SparkPrimitivePtr> Spark::extractPrimitives(const robowflex::SceneConstPtr &scene)
 {
-    std::vector<SparkPrimitive *> primitives;
+    std::vector<SparkPrimitivePtr> primitives;
     auto objects = scene->getCollisionObjects();
     for (auto it1 = objects.begin(); it1 != objects.end(); ++it1)
         for (auto it2 = std::next(it1); it2 != objects.end(); ++it2)
@@ -153,7 +153,7 @@ std::vector<SparkPrimitive *> Spark::extractPrimitives(const robowflex::SceneCon
                 if (it1->find("<octomap>") == std::string::npos &&
                     it2->find("<octomap>") == std::string::npos)
                 {
-                    auto p = new SparkPrimitive();
+                    auto p = std::make_shared<SparkPrimitive>();
                     // add first object
                     p->geometries.first = scene->getObjectGeometry(*it1);
                     p->poses.first = scene->getObjectPose(*it1);
@@ -188,11 +188,11 @@ bool Spark::setBiasedSampler(const ompl::geometric::SimpleSetupPtr &ss, const ro
     ss->getStateSpace()->setStateSamplerAllocator([=](const ob::StateSpace *space) {
         auto start = std::chrono::high_resolution_clock::now();
 
-        std::vector<Entry *> list;
+        std::vector<EntryPtr> list;
         auto primitives = extractPrimitives(scene);
         for (const auto &lp : primitives)
         {
-            auto *rentry = new Entry(lp);
+            EntryPtr rentry = std::make_shared<Entry>(lp);
             db_->nearestR(rentry, params_.dradius, list);
         }
 
@@ -219,15 +219,15 @@ bool Spark::setBiasedSampler(const ompl::geometric::SimpleSetupPtr &ss, const ro
     return true;
 }
 
-std::vector<Entry *> Spark::createEntries(std::vector<SparkPrimitive *> &primitives,
+std::vector<EntryPtr> Spark::createEntries(std::vector<SparkPrimitivePtr> &primitives,
                                           const robowflex::TrajectoryConstPtr &traj,
                                           const robowflex::SceneConstPtr &scene)
 {
-    ROS_INFO("Spark: Proccesing path into entries");
+    ROS_INFO("Spark: Processing path into entries");
 
     auto traj_vec = traj->vectorize();
 
-    std::vector<Entry *> entries;
+    std::vector<EntryPtr> entries;
 
     for (unsigned int i = 0; i < traj->getNumWaypoints(); i++)
     {
@@ -242,11 +242,11 @@ std::vector<Entry *> Spark::createEntries(std::vector<SparkPrimitive *> &primiti
 
             // If the primitive is close enough to the robot add it to the database.
             if (dist < params_.dpairs)
-                entries.emplace_back(new Entry(p, traj_vec[i]));
+                entries.emplace_back(std::make_shared<Entry>(p, traj_vec[i]));
         }
     }
 
-    ROS_INFO("Spark: Path of Length %lu was proccessed to %lu entries ", traj->getNumWaypoints(),
+    ROS_INFO("Spark: Path of Length %lu was processed to %lu entries ", traj->getNumWaypoints(),
              entries.size());
     return entries;
 }

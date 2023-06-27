@@ -40,9 +40,9 @@ FlamePrimitive::FlamePrimitive()
 {
 }
 
-double FlamePrimitive::distance(Primitive *o)
+double FlamePrimitive::distance(PrimitivePtr o)
 {
-    auto other = static_cast<FlamePrimitive *>(o);
+    auto other = std::static_pointer_cast<FlamePrimitive>(o);
     return dist::octoDistance(grid, other->grid, side_size) + dist::transformDistance(pose, other->pose, 0.5);
 }
 
@@ -107,7 +107,7 @@ Flame::~Flame()
     db_->clear();
 }
 
-std::vector<Entry *> Flame::processExperience(const robowflex::TrajectoryConstPtr &traj,
+std::vector<EntryPtr> Flame::processExperience(const robowflex::TrajectoryConstPtr &traj,
                                               const robowflex::SceneConstPtr &scene,
                                               const robowflex::MotionRequestBuilderConstPtr &request)
 {
@@ -151,9 +151,9 @@ std::pair<bool, bool ***> Flame::fillGrid(const octomap::OcTree *tree, Eigen::Ve
     return std::pair<bool, bool ***>(occupied, grid);
 }
 
-std::vector<FlamePrimitive *> Flame::extractPrimitives(const robowflex::SceneConstPtr &scene)
+std::vector<FlamePrimitivePtr> Flame::extractPrimitives(const robowflex::SceneConstPtr &scene)
 {
-    std::vector<FlamePrimitive *> primitives;
+    std::vector<FlamePrimitivePtr> primitives;
     // get the OctomapMessage
     const auto &octoMap = msgToMap(scene->getMessage().world.octomap.octomap);
     auto offset = math::toEigen(scene->getMessage().world.octomap.origin.position);
@@ -182,7 +182,7 @@ std::vector<FlamePrimitive *> Flame::extractPrimitives(const robowflex::SceneCon
             // If the grid is occupied
             if (result.first)
             {
-                auto p = new FlamePrimitive();
+                FlamePrimitivePtr p = std::make_shared<FlamePrimitive>();
 
                 p->voxel_res = voxel_res;
                 p->side_size = side_size;
@@ -211,51 +211,54 @@ bool Flame::setBiasedSampler(const ompl::geometric::SimpleSetupPtr &ss, const ro
         return false;
     }
 
-    ss->getStateSpace()->setStateSamplerAllocator([=](const ob::StateSpace *space) {
-        auto start = std::chrono::high_resolution_clock::now();
-
-        std::vector<Entry *> list;
-        auto primitives = extractPrimitives(scene);
-        for (const auto &lp : primitives)
+    ss->getStateSpace()->setStateSamplerAllocator(
+        [=](const ob::StateSpace *space)
         {
-            auto *rentry = new Entry(lp);
-            // Using any retrieval radius less than 1.
-            db_->nearestR(rentry, 0.1, list);
-        }
+            auto start = std::chrono::high_resolution_clock::now();
 
-        auto mu = db_->vectorize(list);
-        std::shared_ptr<pyre::BiasedStateSampler> bsampler;
+            std::vector<EntryPtr> list;
+            auto primitives = extractPrimitives(scene);
+            for (const auto &lp : primitives)
+            {
+                EntryPtr rentry = std::make_shared<Entry>(lp);
+                // Using any retrieval radius less than 1.
+                db_->nearestR(rentry, 0.1, list);
+            }
 
-        if (!mu.size())  // If nothing is retrieved default to uniform sampling
-            bsampler = std::make_shared<pyre::BiasedStateSampler>(space);
-        else
-            bsampler = std::make_shared<pyre::BiasedStateSampler>(space, mu, params_.lambda, params_.sigma);
+            auto mu = db_->vectorize(list);
+            std::shared_ptr<pyre::BiasedStateSampler> bsampler;
 
-        auto end = std::chrono::high_resolution_clock::now();
+            if (!mu.size())  // If nothing is retrieved default to uniform sampling
+                bsampler = std::make_shared<pyre::BiasedStateSampler>(space);
+            else
+                bsampler =
+                    std::make_shared<pyre::BiasedStateSampler>(space, mu, params_.lambda, params_.sigma);
 
-        statistics_.num_local_samplers = bsampler->gmmSize();
-        statistics_.num_local_prims = list.size();
-        statistics_.ret_time =
-            std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.;
+            auto end = std::chrono::high_resolution_clock::now();
 
-        ROS_INFO("The retrieval time is %f seconds", statistics_.ret_time);
+            statistics_.num_local_samplers = bsampler->gmmSize();
+            statistics_.num_local_prims = list.size();
+            statistics_.ret_time =
+                std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.;
 
-        return bsampler;
-    });
+            ROS_INFO("The retrieval time is %f seconds", statistics_.ret_time);
+
+            return bsampler;
+        });
 
     return true;
 }
 
-std::vector<Entry *> Flame::createEntries(std::vector<FlamePrimitive *> &primitives,
+std::vector<EntryPtr> Flame::createEntries(std::vector<FlamePrimitivePtr> &primitives,
                                           const robowflex::TrajectoryConstPtr &traj,
                                           const robowflex::SceneConstPtr &scene)
 {
-    ROS_INFO("Flame: Proccesing path into entries");
+    ROS_INFO("Flame: Processing path into entries");
     auto scene_copy = scene->deepCopy();
 
     auto traj_vec = traj->vectorize();
 
-    std::vector<Entry *> entries;
+    std::vector<EntryPtr> entries;
 
     for (unsigned int i = 0; i < traj->getNumWaypoints(); i++)
     {
@@ -270,12 +273,12 @@ std::vector<Entry *> Flame::createEntries(std::vector<FlamePrimitive *> &primiti
 
             scene_copy->updateCollisionObject("temp", box, p->pose);
             if (scene_copy->distanceToObject(*state, "temp") <= 0)
-                entries.emplace_back(new Entry(p, traj_vec[i]));
+                entries.emplace_back(std::make_shared<Entry>(p, traj_vec[i]));
             scene_copy->removeCollisionObject("temp");
         }
     }
 
-    ROS_INFO("Flame: Path of Length %lu was proccessed to %lu entries ", traj->getNumWaypoints(),
+    ROS_INFO("Flame: Path of Length %lu was processed to %lu entries ", traj->getNumWaypoints(),
              entries.size());
     return entries;
 }

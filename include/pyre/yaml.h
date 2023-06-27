@@ -65,13 +65,13 @@ namespace pyre
         bool loadDatabase(const DatabasePtr &db, const std::string &filename);
 
         /** \brief Loads entries from a file. Both relative and absolute filenames are acceptable */
-        bool loadEntries(std::vector<Entry *> &entries, const std::string &filename);
+        bool loadEntries(std::vector<EntryPtr> &entries, const std::string &filename);
 
         /** \brief Stores the db in a file. Both relative and absolute filenames are acceptable */
         void storeDatabase(const DatabasePtr &db, const std::string &filename);
 
         /** \brief Stores the entries in a file. Both relative and absolute filenames are acceptable */
-        void storeEntries(const std::vector<Entry *> &vec, const std::string &filename);
+        void storeEntries(const std::vector<EntryPtr> &vec, const std::string &filename);
 
     }  // namespace io
 }  // namespace pyre

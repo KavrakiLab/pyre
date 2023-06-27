@@ -83,7 +83,7 @@ namespace pyre
         Pyre();
 
         /** \brief Process the given experience to pairs of local primitives /local samplers (Entries) */
-        virtual std::vector<Entry *>
+        virtual std::vector<EntryPtr>
         processExperience(const robowflex::TrajectoryConstPtr &traj,  //
                           const robowflex::SceneConstPtr &scene,      //
                           const robowflex::MotionRequestBuilderConstPtr &request) = 0;

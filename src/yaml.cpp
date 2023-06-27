@@ -139,15 +139,15 @@ namespace
         return robowflex::Geometry::makeBox(dimensions[0], dimensions[1], dimensions[2]);
     }
 
-    Entry *YAMLToEntry(const YAML::Node &e)
+    EntryPtr YAMLToEntry(const YAML::Node &e)
     {
-        Entry *entry;
+        EntryPtr entry;
         if (io::isNode(e["key"]))
         {
             auto key = e["key"];
             if (io::isNode(key["geometries"]))
             {
-                auto *prim = new SparkPrimitive();
+                SparkPrimitivePtr prim = std::make_shared<SparkPrimitive>();
                 if (key["geometries"].IsSequence())
                 {
                     prim->geometries.first = YAMLToGeometry(key["geometries"][0]);
@@ -165,11 +165,11 @@ namespace
                     ROS_ERROR("Poses must be a sequence");
 
                 // Create an entry with this key.
-                entry = new Entry(prim);
+                entry = std::make_shared<Entry>(prim);
             }
             else if (io::isNode(key["grid"]))
             {
-                auto *prim = new FlamePrimitive();
+                FlamePrimitivePtr prim = std::make_shared<FlamePrimitive>();
                 if (io::isNode(key["voxel_res"]))
                     prim->voxel_res = key["voxel_res"].as<double>();
                 else
@@ -190,7 +190,7 @@ namespace
                     ROS_ERROR("Pose node does not exist");
 
                 // Create an entry with this key.
-                entry = new Entry(prim);
+                entry = std::make_shared<Entry>(prim);
             }
             else
                 ROS_ERROR("This primitive is not supported");
@@ -209,7 +209,7 @@ namespace
 
     std::shared_ptr<pyre::Database> YAMLToDB(const YAML::Node &node, const DatabasePtr &db)
     {
-        std::vector<Entry *> entries;
+        std::vector<EntryPtr> entries;
 
         for (const auto &e : node)
             entries.emplace_back(YAMLToEntry(e));
@@ -219,11 +219,11 @@ namespace
         return db;
     }
 
-    void YAMLToAdjMat(const YAML::Node &node, std::vector<std::vector<Entry *>> &adj_mat)
+    void YAMLToAdjMat(const YAML::Node &node, std::vector<std::vector<EntryPtr>> &adj_mat)
     {
         for (const auto &vec : node)
         {
-            std::vector<Entry *> entries;
+            std::vector<EntryPtr> entries;
             for (const auto &e : vec["row"])
                 entries.emplace_back(YAMLToEntry(e));
             adj_mat.emplace_back(entries);
@@ -288,7 +288,7 @@ namespace
         return node;
     }
 
-    const YAML::Node SparkPrimitiveToYAML(const SparkPrimitive *prim)
+    const YAML::Node SparkPrimitiveToYAML(SparkPrimitiveConstPtr prim)
     {
         YAML::Node node;
         node["geometries"].push_back(GeometryToYAML(prim->geometries.first));
@@ -299,7 +299,7 @@ namespace
         return node;
     }
 
-    const YAML::Node FlamePrimitiveToYAML(const FlamePrimitive *prim)
+    const YAML::Node FlamePrimitiveToYAML(FlamePrimitiveConstPtr prim)
     {
         YAML::Node node;
         node["voxel_res"] = prim->voxel_res;
@@ -310,14 +310,14 @@ namespace
         return node;
     }
 
-    const YAML::Node EntryToYAML(const Entry *entry)
+    const YAML::Node EntryToYAML(EntryConstPtr entry)
     {
         YAML::Node node;
-        auto spark_key = dynamic_cast<SparkPrimitive *>(entry->key);
+        auto spark_key = std::dynamic_pointer_cast<SparkPrimitive>(entry->key);
         if (spark_key)
             node["key"] = SparkPrimitiveToYAML(spark_key);
 
-        auto flame_key = dynamic_cast<FlamePrimitive *>(entry->key);
+        auto flame_key = std::dynamic_pointer_cast<FlamePrimitive>(entry->key);
         if (flame_key)
             node["key"] = FlamePrimitiveToYAML(flame_key);
 
@@ -327,7 +327,7 @@ namespace
         return node;
     }
 
-    const YAML::Node EntryVecToYAML(const std::vector<Entry *> &vec)
+    const YAML::Node EntryVecToYAML(const std::vector<EntryPtr> &vec)
     {
         YAML::Node node;
         for (const auto &entry : vec)
@@ -435,7 +435,7 @@ bool io::loadDatabase(const DatabasePtr &db, const std::string &filename)
     return true;
 }
 
-bool io::loadEntries(std::vector<Entry *> &entries, const std::string &filename)
+bool io::loadEntries(std::vector<EntryPtr> &entries, const std::string &filename)
 {
     const auto &result = io::loadFileToYAML(resolvePath(filename));
 
@@ -472,7 +472,7 @@ void io::storeDatabase(const DatabasePtr &db, const std::string &filename)
     robowflex::IO::createFile(fout, resolvePackage(filename));
     YAML::Emitter out;
 
-    std::vector<Entry *> list;
+    std::vector<EntryPtr> list;
     db->toList(list);
 
     out << YAML::BeginSeq;
@@ -484,7 +484,7 @@ void io::storeDatabase(const DatabasePtr &db, const std::string &filename)
     fout.close();
 }
 
-void io::storeEntries(const std::vector<Entry *> &list, const std::string &filename)
+void io::storeEntries(const std::vector<EntryPtr> &list, const std::string &filename)
 {
     ROS_INFO("Storing Entries list in %s with %lu entries", resolvePackage(filename).c_str(), list.size());
 
